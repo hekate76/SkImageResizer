@@ -46,7 +46,7 @@ namespace SkImageResizer
             }
         }
 
-        public async Task ResizeImagesAsync(string sourcePath, string destPath, double scale)
+        public async Task ResizeImagesAsync(string sourcePath, string destPath, double scale, CancellationToken token)
         {
             if (!Directory.Exists(destPath))
             {
@@ -61,6 +61,8 @@ namespace SkImageResizer
             {
                 tasks.Add(Task.Run(async () =>
                 {
+                    token.ThrowIfCancellationRequested();
+
                     var bitmap = SKBitmap.Decode(filePath);
                     var imgPhoto = SKImage.FromBitmap(bitmap);
                     var imgName = Path.GetFileNameWithoutExtension(filePath);
@@ -73,6 +75,8 @@ namespace SkImageResizer
 
                     await Task.Run(() =>
                     {
+                        token.ThrowIfCancellationRequested();
+
                         using var scaledBitmap = bitmap.Resize(
                         new SKImageInfo(destinationWidth, destinationHeight),
                         SKFilterQuality.High);
